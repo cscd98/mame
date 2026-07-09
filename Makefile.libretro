@@ -278,7 +278,6 @@ endif
 
 ifneq (,$(or $(findstring webos,$(CROSS_COMPILE)),$(findstring starfish,$(CROSS_COMPILE))))
 	LIBRETRO_CPU :=
-	FORCE_DRC_C_BACKEND := 1
 	PLATFLAGS += NOASM=1
 	PLATFLAGS += ARCHITECTURE=
 	PLATFLAGS += USE_QTDEBUG=0
@@ -287,6 +286,7 @@ ifneq (,$(or $(findstring webos,$(CROSS_COMPILE)),$(findstring starfish,$(CROSS_
 		PLATFLAGS += PLATFORM=arm64
 		TOOLCHAIN_PREFIX = aarch64-webos-linux-gnu-
 	else
+		FORCE_DRC_C_BACKEND := 1
 		PTR64 := 0
 		PLATFLAGS += PLATFORM=arm
 		ifneq (,$(findstring starfish,$(CROSS_COMPILE)))
@@ -296,10 +296,12 @@ ifneq (,$(or $(findstring webos,$(CROSS_COMPILE)),$(findstring starfish,$(CROSS_
 		endif
 	endif
 	PLATFLAGS += OVERRIDE_CC=$(TOOLCHAIN_PREFIX)gcc OVERRIDE_CXX=$(TOOLCHAIN_PREFIX)g++
-	PLATFLAGS += OVERRIDE_LD=$(TOOLCHAIN_PREFIX)ld OVERRIDE_AR=$(TOOLCHAIN_PREFIX)ar
-	PLATFLAGS += CROSS_BUILD=1
-	BUILDFLAGS += LDOPTS=-fuse-ld=gold
-	BUILDFLAGS += LDOPTS+=-Wl,--long-plt
+	PLATFLAGS += OVERRIDE_LD=$(TOOLCHAIN_PREFIX)ld OVERRIDE_AR=$(TOOLCHAIN_PREFIX)gcc-ar
+	PLATFLAGS += CROSS_BUILD=1 LTO=1
+	ifneq ($(shell command -v $(TOOLCHAIN_PREFIX)ld.gold 2>/dev/null),)
+		BUILDFLAGS += LDOPTS=-fuse-ld=gold
+		BUILDFLAGS += LDOPTS+=-Wl,--long-plt
+	endif
     BUILDFLAGS += OPTIMIZE=s
 endif
 
