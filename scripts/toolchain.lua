@@ -484,6 +484,9 @@ function toolchain(_buildDir, _subDir)
 			"m",
 			"android",
 			"log",
+-- RETRO HACK for libretro android
+			"c++_static",
+-- RETRO HACK END for libretro android
 		}
 		buildoptions_c {
 			"--gcc-toolchain=" .. androidToolchainRoot(),
